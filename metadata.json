@@ -1,0 +1,6 @@
+{
+  "name": "WashMate — Karachi's Online Laundry Marketplace",
+  "description": "Compare verified Karachi laundry providers, select per-item washing, ironing, and dry-cleaning services, book hostel or doorstep pickups, and track every order live.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

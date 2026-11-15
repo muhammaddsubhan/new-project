@@ -1,0 +1,388 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered WashMate user profile with role and referral metadata.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "phone": { "type": "string", "minLength": 0, "maxLength": 25 },
+        "role": { "type": "string", "enum": ["customer", "provider", "admin"] },
+        "referralCode": { "type": "string", "minLength": 4, "maxLength": 24 },
+        "referredBy": { "type": "string", "minLength": 0, "maxLength": 24 },
+        "referralCreditsPkr": { "type": "integer" },
+        "favoriteProviderIds": { "type": "array" },
+        "suspended": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email", "role", "referralCode", "referralCreditsPkr", "suspended", "createdAt", "updatedAt"]
+    },
+    "AdminMarker": {
+      "title": "AdminMarker",
+      "description": "Trusted admin privilege document keyed by UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Provider": {
+      "title": "Provider",
+      "description": "Independent Karachi laundry business profile.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "businessName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "description": { "type": "string", "minLength": 10, "maxLength": 1000 },
+        "logoUrl": { "type": "string", "minLength": 0, "maxLength": 500 },
+        "coverImageUrl": { "type": "string", "minLength": 0, "maxLength": 500 },
+        "phone": { "type": "string", "minLength": 7, "maxLength": 25 },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "address": { "type": "string", "minLength": 5, "maxLength": 250 },
+        "primaryArea": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "serviceAreas": { "type": "array" },
+        "operatingHours": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "pickupAvailable": { "type": "boolean" },
+        "deliveryAvailable": { "type": "boolean" },
+        "expressAvailable": { "type": "boolean" },
+        "expressSurchargePkr": { "type": "integer" },
+        "pickupFeePkr": { "type": "integer" },
+        "deliveryFeePkr": { "type": "integer" },
+        "minOrderPkr": { "type": "integer" },
+        "turnaroundHours": { "type": "integer" },
+        "verificationStatus": { "type": "string", "enum": ["Pending", "Approved", "Rejected"] },
+        "isDemo": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "integer" },
+        "completedOrdersCount": { "type": "integer" },
+        "startingPricePkr": { "type": "integer" },
+        "availableServices": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerId", "businessName", "description", "phone", "email", "address", "primaryArea", "serviceAreas", "operatingHours", "pickupAvailable", "deliveryAvailable", "expressAvailable", "expressSurchargePkr", "pickupFeePkr", "deliveryFeePkr", "minOrderPkr", "turnaroundHours", "verificationStatus", "isDemo", "rating", "reviewCount", "completedOrdersCount", "startingPricePkr", "availableServices", "createdAt", "updatedAt"]
+    },
+    "ProviderService": {
+      "title": "ProviderService",
+      "description": "Service capability configuration for a laundry provider.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "serviceType": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "enabled": { "type": "boolean" },
+        "turnaroundHours": { "type": "integer" },
+        "description": { "type": "string", "minLength": 0, "maxLength": 300 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "providerId", "ownerId", "serviceType", "enabled", "turnaroundHours", "createdAt", "updatedAt"]
+    },
+    "ClothingItem": {
+      "title": "ClothingItem",
+      "description": "Provider-specific clothing item and per-service PKR pricing.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "itemName": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "category": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "pricesByService": { "type": "object" },
+        "available": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "providerId", "ownerId", "itemName", "category", "pricesByService", "available", "createdAt", "updatedAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Single-provider laundry pickup and delivery order.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "orderNumber": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "customerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerOwnerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "customerName": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "customerPhone": { "type": "string", "minLength": 7, "maxLength": 25 },
+        "customerEmail": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "pickupAddress": { "type": "string", "minLength": 5, "maxLength": 300 },
+        "area": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "hostelOrBuilding": { "type": "string", "minLength": 0, "maxLength": 120 },
+        "roomNumber": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "pickupDate": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "pickupTimeSlot": { "type": "string", "minLength": 3, "maxLength": 60 },
+        "deliveryDate": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "deliveryTimeSlot": { "type": "string", "minLength": 3, "maxLength": 60 },
+        "specialInstructions": { "type": "string", "minLength": 0, "maxLength": 500 },
+        "isExpress": { "type": "boolean" },
+        "items": { "type": "array" },
+        "subtotalPkr": { "type": "integer" },
+        "pickupFeePkr": { "type": "integer" },
+        "deliveryFeePkr": { "type": "integer" },
+        "expressFeePkr": { "type": "integer" },
+        "discountPkr": { "type": "integer" },
+        "couponCode": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "commissionPkr": { "type": "integer" },
+        "grandTotalPkr": { "type": "integer" },
+        "paymentMethod": { "type": "string", "enum": ["COD", "JazzCash", "Easypaisa"] },
+        "paymentStatus": { "type": "string", "enum": ["Pending", "COD Scheduled", "Awaiting Gateway", "Paid", "Failed"] },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Order Placed",
+            "Provider Accepted",
+            "Pickup Scheduled",
+            "Clothes Collected",
+            "Washing in Progress",
+            "Drying in Progress",
+            "Ironing / Folding",
+            "Ready for Delivery",
+            "Out for Delivery",
+            "Delivered",
+            "Cancelled"
+          ]
+        },
+        "statusHistory": { "type": "array" },
+        "collectedItemCount": { "type": "integer" },
+        "protectionNote": { "type": "string", "minLength": 0, "maxLength": 400 },
+        "hasReviewed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "orderNumber", "customerId", "providerId", "providerOwnerId", "providerName", "customerName", "customerPhone", "customerEmail", "pickupAddress", "area", "pickupDate", "pickupTimeSlot", "deliveryDate", "deliveryTimeSlot", "isExpress", "items", "subtotalPkr", "pickupFeePkr", "deliveryFeePkr", "expressFeePkr", "discountPkr", "commissionPkr", "grandTotalPkr", "paymentMethod", "paymentStatus", "status", "statusHistory", "collectedItemCount", "hasReviewed", "createdAt", "updatedAt"]
+    },
+    "Cart": {
+      "title": "Cart",
+      "description": "Customer single-provider shopping cart.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 0, "maxLength": 128 },
+        "providerName": { "type": "string", "minLength": 0, "maxLength": 120 },
+        "items": { "type": "array" },
+        "couponCode": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "isExpress": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "items", "isExpress", "updatedAt"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "Student monthly laundry subscription record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "userId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "planId": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "planName": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "monthlyLimit": { "type": "integer" },
+        "clothesUsed": { "type": "integer" },
+        "pricePkr": { "type": "integer" },
+        "extraChargePerItemPkr": { "type": "integer" },
+        "status": { "type": "string", "enum": ["Active", "Pending Payment", "Cancelled"] },
+        "startDate": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "endDate": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "planId", "planName", "monthlyLimit", "clothesUsed", "pricePkr", "extraChargePerItemPkr", "status", "startDate", "endDate", "createdAt", "updatedAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Verified customer review for a completed order.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "orderId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerOwnerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "customerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "customerName": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "rating": { "type": "integer" },
+        "comment": { "type": "string", "minLength": 3, "maxLength": 800 },
+        "providerReply": { "type": "string", "minLength": 0, "maxLength": 500 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "orderId", "providerId", "providerOwnerId", "customerId", "customerName", "rating", "comment", "createdAt", "updatedAt"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "description": "Marketplace discount coupon configured by Admin.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "discountType": { "type": "string", "enum": ["percent", "fixed"] },
+        "discountValue": { "type": "integer" },
+        "minOrderPkr": { "type": "integer" },
+        "maxDiscountPkr": { "type": "integer" },
+        "active": { "type": "boolean" },
+        "expiryDate": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "usageCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["code", "discountType", "discountValue", "minOrderPkr", "maxDiscountPkr", "active", "expiryDate", "usageCount", "createdAt", "updatedAt"]
+    },
+    "Address": {
+      "title": "Address",
+      "description": "Saved customer Karachi pickup/delivery address.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "userId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "label": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "area": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "fullAddress": { "type": "string", "minLength": 5, "maxLength": 300 },
+        "hostelOrBuilding": { "type": "string", "minLength": 0, "maxLength": 120 },
+        "roomNumber": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "label", "area", "fullAddress", "isDefault", "createdAt", "updatedAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Order update or WhatsApp dispatch notification record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "userId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "title": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "message": { "type": "string", "minLength": 2, "maxLength": 500 },
+        "channel": { "type": "string", "enum": ["in_app", "whatsapp_ready"] },
+        "orderId": { "type": "string", "minLength": 0, "maxLength": 128 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "message", "channel", "read", "createdAt"]
+    },
+    "Complaint": {
+      "title": "Complaint",
+      "description": "Laundry protection dispute or damaged/missing garment claim.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "orderId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "customerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerOwnerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "type": { "type": "string", "enum": ["Missing Item", "Damaged Garment", "Late Delivery", "Billing", "Other"] },
+        "description": { "type": "string", "minLength": 5, "maxLength": 800 },
+        "affectedItemsCount": { "type": "integer" },
+        "status": { "type": "string", "enum": ["Open", "Investigating", "Resolved", "Rejected"] },
+        "resolutionNote": { "type": "string", "minLength": 0, "maxLength": 500 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "orderId", "customerId", "providerId", "providerOwnerId", "type", "description", "affectedItemsCount", "status", "createdAt", "updatedAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial transaction and commission ledger entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "orderId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "customerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "providerOwnerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "amountPkr": { "type": "integer" },
+        "commissionPkr": { "type": "integer" },
+        "providerNetPkr": { "type": "integer" },
+        "paymentMethod": { "type": "string", "enum": ["COD", "JazzCash", "Easypaisa"] },
+        "status": { "type": "string", "enum": ["COD Pending", "Gateway Unconfigured", "Settled", "Refunded"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "orderId", "customerId", "providerId", "providerOwnerId", "amountPkr", "commissionPkr", "providerNetPkr", "paymentMethod", "status", "createdAt"]
+    },
+    "PlatformSettings": {
+      "title": "PlatformSettings",
+      "description": "Global marketplace commission, referral rewards, and student plan definitions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "commissionPercent": { "type": "integer" },
+        "referralRewardPkr": { "type": "integer" },
+        "studentPlans": { "type": "array" },
+        "whatsappNotificationsEnabled": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "commissionPercent", "referralRewardPkr", "studentPlans", "whatsappNotificationsEnabled", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Private user account profiles."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminMarker" },
+      "description": "Admin role markers keyed by UID."
+    },
+    "/providers/{providerId}": {
+      "schema": { "$ref": "#/entities/Provider" },
+      "description": "Independent Karachi laundry providers."
+    },
+    "/providerServices/{serviceId}": {
+      "schema": { "$ref": "#/entities/ProviderService" },
+      "description": "Services offered by each provider."
+    },
+    "/clothingItems/{itemId}": {
+      "schema": { "$ref": "#/entities/ClothingItem" },
+      "description": "Per-provider clothing items and service pricing."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer laundry orders."
+    },
+    "/carts/{userId}": {
+      "schema": { "$ref": "#/entities/Cart" },
+      "description": "Customer single-provider carts."
+    },
+    "/subscriptions/{subId}": {
+      "schema": { "$ref": "#/entities/Subscription" },
+      "description": "Student monthly laundry subscriptions."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer reviews linked to delivered orders."
+    },
+    "/coupons/{couponCode}": {
+      "schema": { "$ref": "#/entities/Coupon" },
+      "description": "Platform discount coupons."
+    },
+    "/addresses/{addressId}": {
+      "schema": { "$ref": "#/entities/Address" },
+      "description": "Saved Karachi customer addresses."
+    },
+    "/notifications/{notifId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Customer and provider notifications."
+    },
+    "/complaints/{complaintId}": {
+      "schema": { "$ref": "#/entities/Complaint" },
+      "description": "Laundry protection claims and disputes."
+    },
+    "/transactions/{txId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Order payment and commission ledger."
+    },
+    "/platformSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/PlatformSettings" },
+      "description": "Global marketplace configuration."
+    }
+  }
+}
